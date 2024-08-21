@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { TaskType } from '@/components/TaskType';
 import TaskItem from '@/components/todosItem/TaskItem';
 import Pagination from '@/components/pagination/Pagination';
+import { Suspense } from 'react';
+import LoadingSkeleton from '@/app/tasks/LoadingSkeleton';
 interface TodosListProps {
   initialTodos: TaskType[];
   totalTodos: number;
@@ -11,7 +13,7 @@ interface TodosListProps {
 export default function TodoList({ initialTodos, totalTodos }: TodosListProps) {
   const limitItem = 5;
   const totalPages = Math.ceil(totalTodos / limitItem);
-  
+
   const [todos, setTodos] = useState<TaskType[]>(initialTodos);
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -40,11 +42,20 @@ export default function TodoList({ initialTodos, totalTodos }: TodosListProps) {
 
   return (
     <div>
-      <ul>
-        {todos.map((todo) => (
-          <TaskItem key={todo.id} task={todo} deleteTask={() => fetchTodos(currentPage)} />
-        ))}
-      </ul>
+      <section>
+        {
+          todos ?
+            <ul>
+              <Suspense fallback={<LoadingSkeleton />}>
+                {todos.map((todo) => (
+                  <TaskItem key={todo.id} task={todo} deleteTask={() => fetchTodos(currentPage)} />
+                ))}
+              </Suspense>
+            </ul>
+            :
+            <LoadingSkeleton />
+        }
+      </section>
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}

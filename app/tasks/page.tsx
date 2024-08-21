@@ -16,34 +16,27 @@ const add = async (taskDescription: string) => {
 }
 
 export default async function Tasks() {
-    const tasks= await fetchTodos(1); // Fetch initial data for page 1
-    const todos: TaskType[]=tasks.todos
-    const count: number= tasks.totalCount
-    
+    const tasks = await fetchTodos(1); // Fetch initial data for page 1
+    const todos: TaskType[] = tasks.todos
+    const count: number = tasks.totalCount
+
     return (
         <div className="pt-10">
             <section>
                 <TaskForm addTask={add} />
             </section>
-            {/* <section>
-                {
-                    data ?
-                        <Suspense fallback={<LoadingSkeleton />}> <TaskList data={data} /></Suspense>
-                        :
-                        <LoadingSkeleton />
-                }
-
-            </section> */}
-            <TodoList initialTodos={todos} totalTodos={count}/>
-           </div>
+            <section>
+                <TodoList initialTodos={todos} totalTodos={count} />
+            </section>
+        </div>
     );
 }
 
-async function fetchTodos(page:number = 1, limit:number = 5):Promise<{ todos: TaskType[], totalCount: number }> {
+async function fetchTodos(page: number = 1, limit: number = 5): Promise<{ todos: TaskType[], totalCount: number }> {
     const res = await fetch(`http://localhost:8080/tasks?_page=${page}&_limit=${limit}`);
-    const todos:TaskType[] = await res.json();
+    const todos: TaskType[] = await res.json();
     const totalCount = parseInt(res.headers.get('X-Total-Count') || '0', 10);
-console.log(totalCount,'total');
+    console.log(totalCount, 'total');
 
-    return {todos, totalCount};
-  }
+    return { todos, totalCount };
+}
