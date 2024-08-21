@@ -3,8 +3,10 @@ import { useState, useEffect } from 'react';
 import { TaskType } from '@/components/TaskType';
 import TaskItem from '@/components/todosItem/TaskItem';
 import Pagination from '@/components/pagination/Pagination';
+import FetchTodos from '@/app/api/tasks/getTaskes';
 import { Suspense } from 'react';
 import LoadingSkeleton from '@/app/tasks/LoadingSkeleton';
+
 interface TodosListProps {
   initialTodos: TaskType[];
   totalTodos: number;
@@ -21,18 +23,9 @@ export default function TodoList({ initialTodos, totalTodos }: TodosListProps) {
     fetchTodos(currentPage);
   }, [currentPage]);
   async function fetchTodos(page: number) {
-    try {
-      const res = await fetch(`http://localhost:8080/tasks?_page=${page}&_limit=${limitItem}`, {
-        cache: 'no-store',
-      });
-      if (!res.ok) {
-        throw new Error('Failed to fetch todos');
-      }
-      const todos: TaskType[] = await res.json();
-      setTodos(todos);
-    } catch (error) {
-      console.error('Error fetching todos:', error);
-    }
+    const res = await FetchTodos({ page: currentPage })
+    setTodos(res.todos);
+
   }
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= totalPages) {
@@ -42,20 +35,18 @@ export default function TodoList({ initialTodos, totalTodos }: TodosListProps) {
 
   return (
     <div>
-      <section>
+      <ul>
         {
           todos ?
-            <ul>
-              <Suspense fallback={<LoadingSkeleton />}>
-                {todos.map((todo) => (
-                  <TaskItem key={todo.id} task={todo} deleteTask={() => fetchTodos(currentPage)} />
-                ))}
-              </Suspense>
-            </ul>
+            <Suspense fallback={<LoadingSkeleton />}>
+              {todos.map((todo) => (
+                <TaskItem key={todo.id} task={todo} deleteTask={() => fetchTodos(currentPage)} />
+              ))}
+            </Suspense>
             :
             <LoadingSkeleton />
         }
-      </section>
+      </ul>
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
